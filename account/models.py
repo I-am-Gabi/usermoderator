@@ -5,12 +5,15 @@ from django.core.mail import send_mail
 from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.contrib.auth.hashers import make_password, check_password
 from django.conf import settings
 from institutes.models import Institute
 
 import re
 import logging
 logger = logging.getLogger(__name__)
+
+ORDER_STATUS = ((0, 'pending'), (1, 'approved'), (2, 'denied')) 
 
 class UserManager(BaseUserManager): 
     def _create_user(self, username, email, password, status, is_staff, is_superuser, **extra_fields): 
@@ -22,7 +25,7 @@ class UserManager(BaseUserManager):
                  is_staff=is_staff, is_active=True,
                  is_superuser=is_superuser, last_login=now,
                  date_joined=now, **extra_fields)
-        user.set_password(password)
+        user.set_password(make_password(password))
         user.status = status
         user.save(using=self._db)
         logger.debug('save {}'.format(user.get_full_name()))
@@ -40,9 +43,7 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser, PermissionsMixin): 
-    ORDER_STATUS = ((0, 'pending'), (1, 'approved'), (2, 'denied')) 
- 
+class User(AbstractBaseUser, PermissionsMixin):  
     username = models.CharField(_('username'), max_length=15, unique=True,
         help_text=_('Obrigatório. 15 caracteres ou menos. Letras, \
                     números e @/./+/-/_'),
@@ -60,7 +61,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                     Unselect this instead of deleting accounts.'))
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     status = models.PositiveSmallIntegerField(choices=ORDER_STATUS)
-    password = models.CharField(max_length=50)
+    models.CharField(_('password'), max_length=128)
     institute = models.ForeignKey(Institute, on_delete=models.SET_NULL, null=True)
 
     USERNAME_FIELD = 'email'
@@ -75,9 +76,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_full_name(self):
         full_name = '%s %s' % (self.first_name, self.last_name)
         return full_name.strip()
+    
+    def get_institute(self): 
+        return self.institute
 
     def get_short_name(self):
         return self.first_name
+
+    def get_status(self):
+        return ORDER_STATUS[self.status][1]
 
     def email_user(self, subject, message, from_email=None):
         send_mail(subject, message, from_email, [self.email])
