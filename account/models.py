@@ -6,6 +6,7 @@ from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.conf import settings
+from institutes.models import Institute
 
 import re
 import logging
@@ -60,6 +61,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     status = models.PositiveSmallIntegerField(choices=ORDER_STATUS)
     password = models.CharField(max_length=50)
+    institute = models.ForeignKey(Institute, on_delete=models.SET_NULL, null=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
