@@ -25,7 +25,7 @@ SECRET_KEY = 'e2ljqg)p&h1cm#h19x80(+vpkdh@3)e#$v28kjq0pknqxyhc%+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '.pythonanywhere.com']
 
 AUTH_USER_MODEL = 'account.User' 
 
