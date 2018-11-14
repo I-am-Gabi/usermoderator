@@ -3,7 +3,7 @@
 {% block content %}
     {% if user.is_authenticated %}
         <p>
-            Hello, {{ user.get_full_name }}. </br>
+            Olá, {{ user.get_full_name }}. </br>
             Seu status é: {{ user.get_status }}. </br>
             Sua instituição é: {{ user.get_institute }}. </br>
         </p> 

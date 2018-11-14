@@ -25,14 +25,13 @@ class UserManager(BaseUserManager):
                  is_staff=is_staff, is_active=True,
                  is_superuser=is_superuser, last_login=now,
                  date_joined=now, **extra_fields)
-        user.set_password(make_password(password))
+        user.set_password(password) 
         user.status = status
-        user.save(using=self._db)
-        logger.debug('save {}'.format(user.get_full_name()))
+        user.save(using=self._db) 
         return user
 
     def create_user(self, username, email, password, **extra_fields):
-        return self._create_user(username, email, password, 0, False, False,
+        return self._create_user(username, email, make_password(password), 0, False, False,
                  **extra_fields)
 
     def create_superuser(self, username, email, password, **extra_fields):
@@ -61,7 +60,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                     Unselect this instead of deleting accounts.'))
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     status = models.PositiveSmallIntegerField(choices=ORDER_STATUS)
-    models.CharField(_('password'), max_length=128)
+    password = models.CharField(_('password'), max_length=128)
     institute = models.ForeignKey(Institute, on_delete=models.SET_NULL, null=True)
 
     USERNAME_FIELD = 'email'
@@ -71,7 +70,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         verbose_name = _('user')
-        verbose_name_plural = _('users')
+        verbose_name_plural = _('users') 
 
     def get_full_name(self):
         full_name = '%s %s' % (self.first_name, self.last_name)
